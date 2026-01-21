@@ -1,0 +1,11 @@
+{
+    "@@locale": "en",
+    "modelDownloadTitle": "Download Model",
+    "@modelDownloadTitle": {
+        "description": "Title for the model download page"
+    },
+    "transcriptionTitle": "Voice Transcription",
+    "@transcriptionTitle": {
+        "description": "Title for the transcription page"
+    }
+}
