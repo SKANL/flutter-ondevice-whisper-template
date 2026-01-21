@@ -4,6 +4,7 @@ import 'package:w_zentyar_app/l10n/l10n.dart';
 import 'package:w_zentyar_app/model_download/data/model_repository.dart';
 import 'package:w_zentyar_app/transcription/cubit/transcription_cubit.dart';
 import 'package:w_zentyar_app/transcription/cubit/transcription_state.dart';
+import 'package:w_zentyar_app/transcription/models/whisper_language.dart';
 import 'package:w_zentyar_app/transcription/services/audio_recorder_service.dart';
 import 'package:w_zentyar_app/transcription/services/whisper_service.dart';
 
@@ -41,19 +42,44 @@ class TranscriptionView extends StatelessWidget {
         actions: [
           BlocBuilder<TranscriptionCubit, TranscriptionState>(
             builder: (context, state) {
+              final language = state.language;
               final hasTranscription = switch (state) {
                 TranscriptionIdle(:final lastTranscription) =>
                   lastTranscription != null && lastTranscription.isNotEmpty,
                 _ => false,
               };
 
-              if (!hasTranscription) return const SizedBox.shrink();
-
-              return IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () {
-                  context.read<TranscriptionCubit>().clearTranscription();
-                },
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: language,
+                      icon: const Icon(Icons.language),
+                      items: WhisperLanguage.values.map((lang) {
+                        return DropdownMenuItem(
+                          value: lang.code,
+                          child: Text(lang.label),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          context.read<TranscriptionCubit>().changeLanguage(
+                            value,
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (hasTranscription)
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () {
+                        context.read<TranscriptionCubit>().clearTranscription();
+                      },
+                    ),
+                ],
               );
             },
           ),

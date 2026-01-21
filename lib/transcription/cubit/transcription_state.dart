@@ -4,35 +4,59 @@ library;
 /// Base sealed class for transcription states.
 sealed class TranscriptionState {
   const TranscriptionState();
+
+  /// Current selected language (e.g., 'en', 'es').
+  String get language;
 }
 
 /// Initial/idle state, optionally with last transcription.
 final class TranscriptionIdle extends TranscriptionState {
-  const TranscriptionIdle({this.lastTranscription});
+  const TranscriptionIdle({
+    this.lastTranscription,
+    this.language = 'en',
+  });
 
   /// The last transcription result, if any.
   final String? lastTranscription;
+
+  @override
+  final String language;
 }
 
 /// Model is being initialized.
 final class TranscriptionInitializing extends TranscriptionState {
-  const TranscriptionInitializing();
+  const TranscriptionInitializing({this.language = 'en'});
+
+  @override
+  final String language;
 }
 
 /// Recording audio from microphone.
 final class TranscriptionRecording extends TranscriptionState {
-  const TranscriptionRecording({this.lastTranscription});
+  const TranscriptionRecording({
+    this.lastTranscription,
+    required this.language,
+  });
 
   /// Preserve last transcription while recording.
   final String? lastTranscription;
+
+  @override
+  final String language;
 }
 
 /// Processing the recorded audio through Whisper.
 final class TranscriptionProcessing extends TranscriptionState {
-  const TranscriptionProcessing({this.lastTranscription});
+  const TranscriptionProcessing({
+    this.lastTranscription,
+    required this.language,
+  });
 
   /// Preserve last transcription while processing.
   final String? lastTranscription;
+
+  @override
+  final String language;
 }
 
 /// Transcription failed.
@@ -40,8 +64,12 @@ final class TranscriptionFailure extends TranscriptionState {
   const TranscriptionFailure({
     required this.message,
     this.lastTranscription,
+    required this.language,
   });
 
   final String message;
   final String? lastTranscription;
+
+  @override
+  final String language;
 }
