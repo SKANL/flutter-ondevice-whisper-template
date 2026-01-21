@@ -121,7 +121,7 @@ class _RequiredView extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'Para transcribir tu voz, necesitas descargar el modelo Whisper (~100 MB)',
+          'Para transcribir tu voz, necesitas descargar el modelo Whisper (~600 MB)',
           style: Theme.of(context).textTheme.bodyMedium,
           textAlign: TextAlign.center,
         ),
