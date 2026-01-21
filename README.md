@@ -17,7 +17,7 @@ This project is designed as a **base template** that any developer can clone and
 - **Offline Speech Recognition**: Runs entirely on-device (Android/iOS) without internet connection.
 - **Model Management**:
   - Automatic download of Whisper extraction.
-  - **Smart Streaming Extraction**: Uses `InputFileStream` to extract large `tar.bz2` files (~100MB) without crashing memory (fixes OOM issues on low-end devices).
+  - **Smart Streaming Extraction**: Uses `InputFileStream` to extract large `tar.bz2` files (~600MB) without crashing memory (fixes OOM issues on low-end devices).
   - Progress tracking and download animations.
 - **Very Good Architecture**:
   - Built with [Very Good CLI](https://github.com/VeryGoodOpenSource/very_good_cli).
@@ -42,7 +42,7 @@ This template uses the **Whisper Small** model converted for `sherpa-onnx`.
   - `small-decoder.int8.onnx`
   - `small-tokens.txt`
 
-> **Note**: The app downloads the `sherpa-onnx-whisper-small.tar.bz2` archive (~100MB) on first run.
+> **Note**: The app downloads the `sherpa-onnx-whisper-small.tar.bz2` archive (~600MB) on first run.
 
 ---
 
