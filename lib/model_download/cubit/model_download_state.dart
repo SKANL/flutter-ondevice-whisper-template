@@ -1,60 +1,67 @@
-/// State classes for model download feature using sealed classes.
-///
-/// Uses Dart 3 sealed classes for type-safe state management with
-/// exhaustive switch pattern matching.
+/// State classes for model manager feature.
 library;
 
-/// Base sealed class for model download states.
-sealed class ModelDownloadState {
-  const ModelDownloadState();
+import 'package:w_zentyar_app/core_ai/model_registry.dart';
+
+/// Base sealed class for model manager states.
+sealed class ModelManagerState {
+  const ModelManagerState();
 }
 
-/// Initial state before any action.
-final class ModelDownloadInitial extends ModelDownloadState {
-  const ModelDownloadInitial();
+/// Initial state before loading.
+final class ModelManagerInitial extends ModelManagerState {
+  const ModelManagerInitial();
 }
 
-/// Checking if the model is already downloaded.
-final class ModelDownloadChecking extends ModelDownloadState {
-  const ModelDownloadChecking();
+/// Loading model statuses.
+final class ModelManagerLoading extends ModelManagerState {
+  const ModelManagerLoading();
 }
 
-/// Model is not downloaded, user needs to download it.
-final class ModelDownloadRequired extends ModelDownloadState {
-  const ModelDownloadRequired();
-}
-
-/// Model download is in progress.
-final class ModelDownloadInProgress extends ModelDownloadState {
-  const ModelDownloadInProgress({
-    required this.progress,
-    required this.downloadedBytes,
-    required this.totalBytes,
+/// Ready state showing all models.
+final class ModelManagerReady extends ModelManagerState {
+  const ModelManagerReady({
+    required this.modelStatuses,
+    this.downloadingModel,
+    this.downloadProgress,
+    this.isExtracting = false,
   });
 
-  /// Progress from 0.0 to 1.0.
-  final double progress;
+  /// Map of model type to downloaded status.
+  final Map<AiModelType, bool> modelStatuses;
 
-  /// Bytes downloaded so far.
-  final int downloadedBytes;
+  /// Currently downloading model, if any.
+  final AiModelType? downloadingModel;
 
-  /// Total bytes to download.
-  final int totalBytes;
+  /// Download progress (0.0 to 1.0) for current download.
+  final double? downloadProgress;
+
+  /// Whether currently extracting an archive.
+  final bool isExtracting;
+
+  /// Copy with updated values.
+  ModelManagerReady copyWith({
+    Map<AiModelType, bool>? modelStatuses,
+    AiModelType? downloadingModel,
+    double? downloadProgress,
+    bool? isExtracting,
+    bool clearDownloading = false,
+  }) {
+    return ModelManagerReady(
+      modelStatuses: modelStatuses ?? this.modelStatuses,
+      downloadingModel: clearDownloading
+          ? null
+          : (downloadingModel ?? this.downloadingModel),
+      downloadProgress: clearDownloading
+          ? null
+          : (downloadProgress ?? this.downloadProgress),
+      isExtracting: isExtracting ?? this.isExtracting,
+    );
+  }
 }
 
-/// Extracting the downloaded archive.
-final class ModelDownloadExtracting extends ModelDownloadState {
-  const ModelDownloadExtracting();
-}
-
-/// Model downloaded and ready.
-final class ModelDownloadSuccess extends ModelDownloadState {
-  const ModelDownloadSuccess();
-}
-
-/// Download or extraction failed.
-final class ModelDownloadFailure extends ModelDownloadState {
-  const ModelDownloadFailure({required this.message});
-
+/// Error state.
+final class ModelManagerError extends ModelManagerState {
+  const ModelManagerError({required this.message});
   final String message;
 }

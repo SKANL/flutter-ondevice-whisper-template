@@ -1,82 +1,95 @@
 import 'package:bloc/bloc.dart';
+import 'package:w_zentyar_app/core_ai/model_registry.dart';
 import 'package:w_zentyar_app/model_download/cubit/model_download_state.dart';
 import 'package:w_zentyar_app/model_download/data/model_repository.dart';
 
-/// Cubit for managing the model download process.
+/// Cubit for managing multiple AI models.
 ///
-/// Handles checking model status, downloading, and error handling.
-class ModelDownloadCubit extends Cubit<ModelDownloadState> {
-  ModelDownloadCubit({
+/// Handles downloading, deleting, and checking status of all AI models.
+class ModelManagerCubit extends Cubit<ModelManagerState> {
+  ModelManagerCubit({
     required ModelRepository modelRepository,
   }) : _modelRepository = modelRepository,
-       super(const ModelDownloadInitial());
+       super(const ModelManagerInitial());
 
   final ModelRepository _modelRepository;
 
-  /// Checks if the model is already downloaded.
-  Future<void> checkModelStatus() async {
-    emit(const ModelDownloadChecking());
+  /// Loads status of all models.
+  Future<void> loadModelStatuses() async {
+    emit(const ModelManagerLoading());
 
     try {
-      final isDownloaded = await _modelRepository.isModelDownloaded();
-
-      if (isDownloaded) {
-        emit(const ModelDownloadSuccess());
-      } else {
-        emit(const ModelDownloadRequired());
-      }
+      final statuses = await _modelRepository.getAllModelStatuses();
+      emit(ModelManagerReady(modelStatuses: statuses));
     } catch (e) {
-      emit(ModelDownloadFailure(message: e.toString()));
+      emit(ModelManagerError(message: e.toString()));
     }
   }
 
-  /// Downloads the model from the remote server.
-  Future<void> downloadModel() async {
+  /// Downloads a specific model.
+  Future<void> downloadModel(AiModelType type) async {
+    final currentState = state;
+    if (currentState is! ModelManagerReady) return;
+    if (currentState.downloadingModel != null) return;
+
     emit(
-      const ModelDownloadInProgress(
-        progress: 0,
-        downloadedBytes: 0,
-        totalBytes: 0,
+      currentState.copyWith(
+        downloadingModel: type,
+        downloadProgress: 0,
       ),
     );
 
     try {
       await _modelRepository.downloadModel(
+        type,
         onProgress: (received, total) {
           if (total > 0) {
-            emit(
-              ModelDownloadInProgress(
-                progress: received / total,
-                downloadedBytes: received,
-                totalBytes: total,
-              ),
-            );
+            final progress = received / total;
+            final latest = state;
+            if (latest is ModelManagerReady) {
+              emit(latest.copyWith(downloadProgress: progress));
+            }
           }
         },
         onExtractionStart: () {
-          emit(const ModelDownloadExtracting());
+          final latest = state;
+          if (latest is ModelManagerReady) {
+            emit(latest.copyWith(isExtracting: true));
+          }
         },
       );
 
-      // Verify the model was extracted correctly
-      final isDownloaded = await _modelRepository.isModelDownloaded();
-
-      if (isDownloaded) {
-        emit(const ModelDownloadSuccess());
-      } else {
-        emit(
-          const ModelDownloadFailure(
-            message: 'Model extraction failed. Please try again.',
-          ),
-        );
-      }
+      // Refresh statuses
+      final statuses = await _modelRepository.getAllModelStatuses();
+      emit(ModelManagerReady(modelStatuses: statuses));
     } catch (e) {
-      emit(ModelDownloadFailure(message: e.toString()));
+      final latest = state;
+      if (latest is ModelManagerReady) {
+        emit(latest.copyWith(clearDownloading: true));
+      }
+      emit(ModelManagerError(message: 'Download failed: $e'));
     }
   }
 
-  /// Retries the download after a failure.
+  /// Deletes a specific model.
+  Future<void> deleteModel(AiModelType type) async {
+    final currentState = state;
+    if (currentState is! ModelManagerReady) return;
+
+    try {
+      await _modelRepository.deleteModel(type);
+      final statuses = await _modelRepository.getAllModelStatuses();
+      emit(ModelManagerReady(modelStatuses: statuses));
+    } catch (e) {
+      emit(ModelManagerError(message: 'Delete failed: $e'));
+    }
+  }
+
+  /// Retries after error.
   Future<void> retry() async {
-    await checkModelStatus();
+    await loadModelStatuses();
   }
 }
+
+// Keep old name for backward compatibility
+typedef ModelDownloadCubit = ModelManagerCubit;

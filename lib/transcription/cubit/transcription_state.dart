@@ -34,8 +34,8 @@ final class TranscriptionInitializing extends TranscriptionState {
 /// Recording audio from microphone.
 final class TranscriptionRecording extends TranscriptionState {
   const TranscriptionRecording({
-    this.lastTranscription,
     required this.language,
+    this.lastTranscription,
   });
 
   /// Preserve last transcription while recording.
@@ -48,8 +48,8 @@ final class TranscriptionRecording extends TranscriptionState {
 /// Processing the recorded audio through Whisper.
 final class TranscriptionProcessing extends TranscriptionState {
   const TranscriptionProcessing({
-    this.lastTranscription,
     required this.language,
+    this.lastTranscription,
   });
 
   /// Preserve last transcription while processing.
@@ -63,8 +63,8 @@ final class TranscriptionProcessing extends TranscriptionState {
 final class TranscriptionFailure extends TranscriptionState {
   const TranscriptionFailure({
     required this.message,
-    this.lastTranscription,
     required this.language,
+    this.lastTranscription,
   });
 
   final String message;
