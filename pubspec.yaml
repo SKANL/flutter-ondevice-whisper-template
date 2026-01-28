@@ -24,7 +24,7 @@ dependencies:
   record: ^6.1.2
 
   # HTTP Client (obligatorio según DEVELOPMENT_RULES)
-  dio: ^5.9.0
+  dio: ^5.9.1
 
   # Archive extraction (tar.bz2)
   archive: ^4.0.7
